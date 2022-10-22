@@ -1,30 +1,31 @@
 #include <stdio.h>
-#include "svm/svm_opcodes.h"
+#include "svm/svm_types.h"
 #include <stdint.h>
 
 int main() {
-	int stack_size = 3;
+	int meta_size = 2;
+	int mem_size = 1;
 	int program_size = 2;
 	int meta[] = {
-		stack_size, program_size
+		mem_size, program_size
 	};
 
-	uint64_t stack[] = {
-		10, 20, 30
+	uint64_t memory[] = {
+		10
 	};
 
 	int program[] = { 
-		OP_PUSH,
+		OP_PUSH_INT,
 		OP_PRINT_INT
 	};
 
 	FILE* file = fopen("test.svm", "wb");
 
-	for (int i = 0; i < 2; i++)
+	for (int i = 0; i < meta_size; i++)
 		fwrite(&meta[i], 1, 1, file);
 
-	for (int i = 0; i < stack_size; i++)
-		fwrite(&stack[i], 1, 1, file);
+	for (int i = 0; i < mem_size; i++)
+		fwrite(&memory[i], 1, 1, file);
 
 	for (int i = 0; i < program_size; i++)
 		fwrite(&program[i], 1, 1, file);
