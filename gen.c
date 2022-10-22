@@ -2,6 +2,7 @@
 #include "svm/svm_types.h"
 #include <stdint.h>
 
+
 int main() {
 	int meta_size = 2;
 	int mem_size = 1;
@@ -11,7 +12,7 @@ int main() {
 	};
 
 	uint64_t memory[] = {
-		10
+		69
 	};
 
 	int program[] = { 

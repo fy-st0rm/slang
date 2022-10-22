@@ -4,6 +4,7 @@
 #include "svm_types.h"
 #include "cutil.h"
 #include <stdint.h>
+#include "common.h"
 
 #define SVM_STACK_CAPACITY 1024
 #define SVM_MEMORY_CAPACITY 1024
@@ -13,12 +14,11 @@ typedef struct {
 	uint64_t as_ui64;
 	int64_t  as_i64;
 	char     as_char;
-	char*    as_str;
 } Svm_Value;
 
 typedef struct {
 	Svm_Value value;
-	uint64_t type;
+	Svm_Type type;
 } Svm_Stack_Value;
 
 typedef struct {
@@ -34,13 +34,9 @@ typedef struct {
 	uint64_t memory_size;
 	uint64_t mp;
 
-	svm_opcodes program[SVM_PROGRAM_CAPACITY];
+	Svm_Opcode program[SVM_PROGRAM_CAPACITY];
 	uint64_t program_size;
 } Svm;
-
-
-/* Utils */
-int get_file_sz(FILE* file);
 
 /* Print functions */
 void print_meta(Svm_Meta* meta);

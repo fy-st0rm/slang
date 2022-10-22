@@ -6,13 +6,13 @@
 
 typedef enum {
 	TP_INT
-} svm_types;
+} Svm_Type;
 
 typedef enum {
 	OP_PUSH_INT,
 	OP_POP_INT,
 	OP_PRINT_INT
-} svm_opcodes;
+} Svm_Opcode;
 
 static char* opcode_to_str(uint64_t opcode) {
 	switch (opcode) {

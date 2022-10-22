@@ -1,13 +1,6 @@
 #include "cutil.h"
 #include "svm.h"
 
-int get_file_sz(FILE* file) {
-	fseek(file, 0, SEEK_END);
-	int sz = ftell(file);
-	fseek(file, 0, SEEK_SET);
-	return sz;
-}
-
 /* Print functions */
 void print_meta(Svm_Meta* meta) {
 	printf("------PROGRAM META START---------\n");
@@ -65,7 +58,6 @@ void load_memory(Svm* svm, const char** buffer) {
 			.as_ui64 = (uint64_t) ch,
 			.as_i64  = (int64_t)  ch,
 			.as_char = (char)     ch,
-			.as_str  = (char*)    ch
 		};
 		svm->memory[i] = val;
 	}
@@ -87,7 +79,7 @@ void load_bytecode(Svm* svm, Svm_Meta* meta, const char* file_name) {
 	}
 
 	// Reading the file
-	int size = get_file_sz(fd);
+	int size = get_file_size(fd);
 	const char* buffer = cutil_alloc(size);
 	fread(buffer, sizeof(buffer), 1, fd);
 
