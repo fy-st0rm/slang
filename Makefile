@@ -18,3 +18,9 @@ sasm_build:
 	$(CC) -o $(SASM_OUT) *.o
 	rm *.o
 
+clean:
+	rm *.o
+
+all:
+	$(MAKE) svm_build
+	$(MAKE) sasm_build

@@ -11,22 +11,6 @@
 #define SVM_PROGRAM_CAPACITY 1024
 
 typedef struct {
-	uint64_t as_ui64;
-	int64_t  as_i64;
-	char     as_char;
-} Svm_Value;
-
-typedef struct {
-	Svm_Value value;
-	Svm_Type type;
-} Svm_Stack_Value;
-
-typedef struct {
-	uint64_t memory_size;
-	uint64_t program_size;
-} Svm_Meta;
-
-typedef struct {
 	Svm_Stack_Value stack[SVM_STACK_CAPACITY];
 	uint64_t stack_size;
 

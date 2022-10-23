@@ -4,17 +4,22 @@
 #include "cutil.h"
 #include <stdint.h>
 #include "common.h"
+#include "../svm/svm_types.h"
 
 typedef enum {
 	INST_PUSHI,
-	INST_PRINTI
+	INST_PUSHS,
+	INST_PRINTI,
+	INST_PRINTS,
+	INST_ADDI
 } Sasm_Inst;
 
-char* inst_to_str(uint64_t inst);
+char* inst_to_str(Sasm_Inst inst);
 Sasm_Inst str_to_inst(char* c_str);
 
 typedef enum {
 	TOKEN_KIND_INT,
+	TOKEN_KIND_STR,
 	TOKEN_KIND_INST
 } Token_Kind;
 
@@ -27,7 +32,8 @@ typedef struct {
 
 typedef struct {
 	Token_Kind kind;
-	str value;
+	Svm_Value value;
+	str source;
 	Location loc;
 } Token;
 

@@ -2,6 +2,14 @@
 #include "svm.h"
 
 /* Print functions */
+void print_buffer(const char* buffer, int size) {
+	printf("-------BUFFER START---------\n");
+	for (int i = 0; i < size; i++) {
+		printf("%02x ", buffer[i]);
+	}
+	printf("\n-------BUFFER END  ---------\n");
+}
+
 void print_meta(Svm_Meta* meta) {
 	printf("------PROGRAM META START---------\n");
 	printf("- memory size: %d\n", meta->memory_size);
@@ -81,7 +89,8 @@ void load_bytecode(Svm* svm, Svm_Meta* meta, const char* file_name) {
 	// Reading the file
 	int size = get_file_size(fd);
 	const char* buffer = cutil_alloc(size);
-	fread(buffer, sizeof(buffer), 1, fd);
+	fread(buffer, size, 1, fd);
+	print_buffer(buffer, size);
 
 	// Loading meta data
 	load_meta(meta, &buffer);
@@ -108,14 +117,27 @@ void execute_program(Svm* svm) {
 		switch (opcode) {
 			case OP_PUSH_INT: {
 				Svm_Stack_Value s_val = {
-					.value = svm->memory[svm->mp],
+					.value = svm->memory[svm->mp++],
 					.type  = TP_INT
 				};
 				svm->stack[svm->stack_size++] = s_val;
 				break;
 			}
-			case OP_POP_INT: {
-				cutil_assert(false, "%s hasnt been implemented yet!\n", opcode_to_str(opcode));
+			case OP_PUSH_STR: {
+				Svm_Stack_Value str_len = {
+					.value = svm->memory[svm->mp++],
+					.type  = TP_STR
+				};
+
+				for (int i = 0; i < str_len.value.as_i64; i++) {
+					Svm_Stack_Value ch = {
+						.value = svm->memory[svm->mp++],
+						.type  = TP_CHAR
+					};
+					svm->stack[svm->stack_size++] = ch;
+				}
+
+				svm->stack[svm->stack_size++] = str_len;
 				break;
 			}
 			case OP_PRINT_INT: {
@@ -125,6 +147,37 @@ void execute_program(Svm* svm) {
 				}
 				else {
 					cutil_assert(false, "%s cannot print type `%s`\n", opcode_to_str(opcode), type_to_str(s_val.type));
+				}
+				break;
+			}
+			case OP_PRINT_STR: {
+				Svm_Stack_Value str_len = svm->stack[--svm->stack_size];
+				if (str_len.type != TP_STR)
+					cutil_assert(false, "%s cannot print type `%s`\n", opcode_to_str(opcode), type_to_str(str_len.type));
+
+				uint64_t len = str_len.value.as_i64;
+
+				char out[len];
+				out[len] = '\0';
+
+				// String in stack are stored in reversed so the insertion is reversed
+				for (int i = len - 1; i >= 0; i--) {
+					out[i] = svm->stack[--svm->stack_size].value.as_char;
+				}
+
+				printf("%s", out);
+				break;
+			}
+			case OP_ADD_INT: {
+				Svm_Stack_Value a = svm->stack[--svm->stack_size];
+				Svm_Stack_Value b = svm->stack[--svm->stack_size];
+				if (a.type == TP_INT && b.type == TP_INT) {
+					Svm_Stack_Value res = a;
+					res.value.as_i64 += b.value.as_i64;
+					svm->stack[svm->stack_size++] = res;
+				}
+				else {
+					cutil_assert(false, "%s cannot add type `%s` and `%s`\n", opcode_to_str(opcode), type_to_str(a.type), type_to_str(b.type));
 				}
 				break;
 			}
