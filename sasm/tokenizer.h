@@ -46,6 +46,7 @@ typedef struct {
 
 Tokenizer tokenizer_from_file(const char* file);
 Token_Kind identify_token(str token_value);
+char get_escape_code(char ch);
 Token get_next_token(Tokenizer* tokenizer);
 Token expect_next_token(Tokenizer* tokenizer, Token_Kind token_kind);
 

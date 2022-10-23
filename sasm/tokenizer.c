@@ -95,6 +95,17 @@ Token_Kind identify_token(str token_value) {
 	}
 }
 
+char get_escape_code(char ch) {
+	switch (ch) {
+		case 'n':
+			return '\n';
+		case 't':
+			return '\t';
+		default:
+			cutil_assert(false, "Unhandled escape code `\\%c`.\n", ch);
+	}
+}
+
 Token get_next_token(Tokenizer* tokenizer) {
 	if (!tokenizer->line.len) {
 		cutil_str_delete(&tokenizer->line);
@@ -111,14 +122,22 @@ Token get_next_token(Tokenizer* tokenizer) {
 		tk = identify_token(word);
 	} else {
 		// Parsing the string
-
 		word = cutil_str_new("");
 		char i = *tokenizer->line.c_str++;
 		tokenizer->line.len--;
 		do {
 			i = *tokenizer->line.c_str++;
 			tokenizer->line.len--;
-			if (i != '\"') cutil_str_add_char(&word, i);
+
+			// Handling escape codes
+			if (i == '\\') {
+				i = *tokenizer->line.c_str++;
+				tokenizer->line.len--;
+				cutil_str_add_char(&word, get_escape_code(i));
+			}
+			else if (i != '\"') {
+				cutil_str_add_char(&word, i);
+			}
 		} while (i != '\"');
 
 		tk = TOKEN_KIND_STR;

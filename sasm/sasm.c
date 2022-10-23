@@ -170,7 +170,6 @@ int main(int argc, char** argv) {
 	Sasm sasm = sasm_init(argv[1], MEMORY_CAPACITY, PROGRAM_CAPACITY);
 	Tokenizer tokenizer = tokenizer_from_file(argv[1]);
 	execute_tokens(&sasm, &tokenizer);
-	print_sasm_memory(&sasm);
 	sasm_gen_svm_bytecode(&sasm);
 
 	//sasm_delete(&sasm);

@@ -1,2 +1,2 @@
-pushs "Hello world"
+pushs "Hello world\n"
 prints
