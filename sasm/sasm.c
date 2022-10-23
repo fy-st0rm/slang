@@ -131,12 +131,22 @@ void execute_tokens(Sasm* sasm, Tokenizer* tokenizer) {
 						sasm_push_opcode(sasm, OP_PUSH_STR);
 						break;
 					}
+					case INST_PUSHC: {
+						Token value = expect_next_token(tokenizer, TOKEN_KIND_CHAR);
+						sasm_push_memory(sasm, value.value.as_char);
+						sasm_push_opcode(sasm, OP_PUSH_CHAR);
+						break;
+					}
 					case INST_PRINTI: {
 						sasm_push_opcode(sasm, OP_PRINT_INT);
 						break;
 					}
 					case INST_PRINTS: {
 						sasm_push_opcode(sasm, OP_PRINT_STR);
+						break;
+					}
+					case INST_PRINTC: {
+						sasm_push_opcode(sasm, OP_PRINT_CHAR);
 						break;
 					}
 					case INST_ADDI: {

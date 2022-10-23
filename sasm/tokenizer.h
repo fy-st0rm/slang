@@ -9,8 +9,10 @@
 typedef enum {
 	INST_PUSHI,
 	INST_PUSHS,
+	INST_PUSHC,
 	INST_PRINTI,
 	INST_PRINTS,
+	INST_PRINTC,
 	INST_ADDI
 } Sasm_Inst;
 
@@ -20,6 +22,7 @@ Sasm_Inst str_to_inst(char* c_str);
 typedef enum {
 	TOKEN_KIND_INT,
 	TOKEN_KIND_STR,
+	TOKEN_KIND_CHAR,
 	TOKEN_KIND_INST
 } Token_Kind;
 
@@ -45,8 +48,9 @@ typedef struct {
 } Tokenizer;
 
 Tokenizer tokenizer_from_file(const char* file);
-Token_Kind identify_token(str token_value);
+Token_Kind identify_token(str token_value, Location loc);
 char get_escape_code(char ch);
+Token_Kind parse_str_or_char(Tokenizer* tokenizer, str* word);
 Token get_next_token(Tokenizer* tokenizer);
 Token expect_next_token(Tokenizer* tokenizer, Token_Kind token_kind);
 

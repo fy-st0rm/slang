@@ -140,14 +140,19 @@ void execute_program(Svm* svm) {
 				svm->stack[svm->stack_size++] = str_len;
 				break;
 			}
+			case OP_PUSH_CHAR: {
+				Svm_Stack_Value s_val = {
+					.value = svm->memory[svm->mp++],
+					.type  = TP_CHAR
+				};
+				svm->stack[svm->stack_size++] = s_val;
+				break;
+			}
 			case OP_PRINT_INT: {
 				Svm_Stack_Value s_val = svm->stack[--svm->stack_size];
-				if (s_val.type == TP_INT) {
-					printf("%d", s_val.value.as_i64);
-				}
-				else {
+				if (s_val.type != TP_INT)
 					cutil_assert(false, "%s cannot print type `%s`\n", opcode_to_str(opcode), type_to_str(s_val.type));
-				}
+				printf("%d", s_val.value.as_i64);
 				break;
 			}
 			case OP_PRINT_STR: {
@@ -168,6 +173,13 @@ void execute_program(Svm* svm) {
 				printf("%s", out);
 				break;
 			}
+			case OP_PRINT_CHAR: {
+				Svm_Stack_Value s_val = svm->stack[--svm->stack_size];
+				if (s_val.type != TP_CHAR)
+					cutil_assert(false, "%s cannot print type `%s`\n", opcode_to_str(opcode), type_to_str(s_val.type));
+				printf("%c", s_val.value.as_char);
+				break;
+			}
 			case OP_ADD_INT: {
 				Svm_Stack_Value a = svm->stack[--svm->stack_size];
 				Svm_Stack_Value b = svm->stack[--svm->stack_size];
@@ -182,7 +194,7 @@ void execute_program(Svm* svm) {
 				break;
 			}
 			default:
-				cutil_assert(false, "Unknown OPCODE `%d`\n", opcode);
+				cutil_assert(false, "Unknown OPCODE `%s`\n", opcode_to_str(opcode));
 		}
 	}
 }

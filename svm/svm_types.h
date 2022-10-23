@@ -13,8 +13,10 @@ typedef enum {
 typedef enum {
 	OP_PUSH_INT,
 	OP_PUSH_STR,
+	OP_PUSH_CHAR,
 	OP_PRINT_INT,
 	OP_PRINT_STR,
+	OP_PRINT_CHAR,
 	OP_ADD_INT
 } Svm_Opcode;
 
@@ -41,10 +43,14 @@ static char* opcode_to_str(uint64_t opcode) {
 			return "OP_PUSH_INT";
 		case OP_PUSH_STR:
 			return "OP_PUSH_STR";
+		case OP_PUSH_CHAR:
+			return "OP_PUSH_CHAR";
 		case OP_PRINT_INT:
 			return "OP_PRINT_INT";
 		case OP_PRINT_STR:
 			return "OP_PRINT_STR";
+		case OP_PRINT_CHAR:
+			return "OP_PRINT_CHAR";
 		case OP_ADD_INT:
 			return "OP_ADD_INT";
 		default:

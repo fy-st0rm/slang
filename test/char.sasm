@@ -1,0 +1,12 @@
+pushc '\n'
+pushc 'o'
+pushc 'l'
+pushc 'l'
+pushc 'e'
+pushc 'H'
+printc
+printc
+printc
+printc
+printc
+printc

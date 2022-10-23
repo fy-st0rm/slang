@@ -6,10 +6,14 @@ char* inst_to_str(Sasm_Inst inst) {
 			return "pushi";
 		case INST_PUSHS:
 			return "pushs";
+		case INST_PUSHC:
+			return "pushc";
 		case INST_PRINTI:
 			return "printi";
 		case INST_PRINTS:
 			return "prints";
+		case INST_PRINTC:
+			return "printc";
 		case INST_ADDI:
 			return "addi";
 		default:
@@ -20,12 +24,16 @@ char* inst_to_str(Sasm_Inst inst) {
 Sasm_Inst str_to_inst(char* c_str) {
 	if (!strcmp(c_str, inst_to_str(INST_PUSHI)))
 		return INST_PUSHI;
-	if (!strcmp(c_str, inst_to_str(INST_PUSHS)))
+	else if (!strcmp(c_str, inst_to_str(INST_PUSHS)))
 		return INST_PUSHS;
+	else if (!strcmp(c_str, inst_to_str(INST_PUSHC)))
+		return INST_PUSHC;
 	else if (!strcmp(c_str, inst_to_str(INST_PRINTI)))
 		return INST_PRINTI;
 	else if (!strcmp(c_str, inst_to_str(INST_PRINTS)))
 		return INST_PRINTS;
+	else if (!strcmp(c_str, inst_to_str(INST_PRINTC)))
+		return INST_PRINTC;
 	else if (!strcmp(c_str, inst_to_str(INST_ADDI)))
 		return INST_ADDI;
 	cutil_assert(false, "Unknown instruction with name `%s`\n", c_str);
@@ -37,6 +45,8 @@ char* token_kind_to_str(uint64_t token_kind) {
 			return "TOKEN_KIND_INT";
 		case TOKEN_KIND_STR:
 			return "TOKEN_KIND_STR";
+		case TOKEN_KIND_CHAR:
+			return "TOKEN_KIND_CHAR";
 		case TOKEN_KIND_INST:
 			return "TOKEN_KIND_INST";
 		default:
@@ -71,17 +81,23 @@ Tokenizer tokenizer_from_file(const char* file) {
 	return tokenizer;
 }
 
-Token_Kind identify_token(str token_value) {
+Token_Kind identify_token(str token_value, Location loc) {
 	if (!strcmp(token_value.c_str, inst_to_str(INST_PUSHI))) {
 		return TOKEN_KIND_INST;
 	}
 	if (!strcmp(token_value.c_str, inst_to_str(INST_PUSHS))) {
 		return TOKEN_KIND_INST;
 	}
+	if (!strcmp(token_value.c_str, inst_to_str(INST_PUSHC))) {
+		return TOKEN_KIND_INST;
+	}
 	else if (!strcmp(token_value.c_str, inst_to_str(INST_PRINTI))) {
 		return TOKEN_KIND_INST;
 	}
 	else if (!strcmp(token_value.c_str, inst_to_str(INST_PRINTS))) {
+		return TOKEN_KIND_INST;
+	}
+	else if (!strcmp(token_value.c_str, inst_to_str(INST_PRINTC))) {
 		return TOKEN_KIND_INST;
 	}
 	else if (!strcmp(token_value.c_str, inst_to_str(INST_ADDI))) {
@@ -91,7 +107,7 @@ Token_Kind identify_token(str token_value) {
 		return TOKEN_KIND_INT;
 	}
 	else if (token_value.len > 0) {
-		cutil_assert(false, "Unknown token value `%s`\n", token_value.c_str);
+		error(loc, "Unknown token value `%s`\n", token_value.c_str);
 	}
 }
 
@@ -106,6 +122,30 @@ char get_escape_code(char ch) {
 	}
 }
 
+Token_Kind parse_str_or_char(Tokenizer* tokenizer, str* word) {
+	*word = cutil_str_new("");
+	char i = *tokenizer->line.c_str++;
+	tokenizer->line.len--;
+	do {
+		i = *tokenizer->line.c_str++;
+		tokenizer->line.len--;
+
+		// Handling escape codes
+		if (i == '\\') {
+			i = *tokenizer->line.c_str++;
+			tokenizer->line.len--;
+			cutil_str_add_char(word, get_escape_code(i));
+		}
+		else if (i != '\"') {
+			cutil_str_add_char(word, i);
+		}
+	} while (i != '\"' && i != '\'');
+
+	if (i == '\"')
+		return TOKEN_KIND_STR;
+	return TOKEN_KIND_CHAR;
+}
+
 Token get_next_token(Tokenizer* tokenizer) {
 	if (!tokenizer->line.len) {
 		cutil_str_delete(&tokenizer->line);
@@ -117,30 +157,12 @@ Token get_next_token(Tokenizer* tokenizer) {
 	str word;
 	Token_Kind tk;
 
-	if (tokenizer->line.c_str[0] != '\"') {
+	if (tokenizer->line.c_str[0] != '\"' && tokenizer->line.c_str[0] != '\'') {
 		word = cutil_str_split(&tokenizer->line, ' ');
-		tk = identify_token(word);
-	} else {
-		// Parsing the string
-		word = cutil_str_new("");
-		char i = *tokenizer->line.c_str++;
-		tokenizer->line.len--;
-		do {
-			i = *tokenizer->line.c_str++;
-			tokenizer->line.len--;
-
-			// Handling escape codes
-			if (i == '\\') {
-				i = *tokenizer->line.c_str++;
-				tokenizer->line.len--;
-				cutil_str_add_char(&word, get_escape_code(i));
-			}
-			else if (i != '\"') {
-				cutil_str_add_char(&word, i);
-			}
-		} while (i != '\"');
-
-		tk = TOKEN_KIND_STR;
+		tk = identify_token(word, tokenizer->curr_loc);
+	}
+	else {
+		tk = parse_str_or_char(tokenizer, &word);
 	}
 
 	// Creating the value
